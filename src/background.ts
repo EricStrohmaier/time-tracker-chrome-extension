@@ -18,11 +18,21 @@ let authState = {
 };
 
 // Check if user is already authenticated on startup
-chrome.storage.local.get(['userData'], (result) => {
-  if (result.userData) {
+chrome.storage.local.get(['userData', 'token'], (result) => {
+  if (result.userData && result.token) {
     authState.isAuthenticated = true;
     authState.user = result.userData;
     console.log('User is already authenticated:', authState.user);
+    
+    // Set badge to indicate logged-in state
+    chrome.action.setBadgeText({ text: '✓' });
+    chrome.action.setBadgeBackgroundColor({ color: '#00873c' });
+  } else {
+    // Clear auth state if incomplete data
+    authState.isAuthenticated = false;
+    authState.user = null;
+    chrome.storage.local.remove(['userData', 'token', 'activeTimeEntry']);
+    chrome.action.setBadgeText({ text: '' });
   }
 });
 
@@ -42,6 +52,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       userData: message.user,
       token: message.token
     });
+    
+    // Set badge to indicate logged-in state
+    chrome.action.setBadgeText({ text: '✓' });
+    chrome.action.setBadgeBackgroundColor({ color: '#00873c' });
 
     // Notify all extension pages about the auth update
     chrome.runtime.sendMessage({
@@ -82,7 +96,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     authState.user = null;
 
     // Clear storage
-    chrome.storage.local.remove(['userData', 'activeTimeEntry']);
+    chrome.storage.local.remove(['userData', 'token', 'activeTimeEntry']);
+    
+    // Clear badge
+    chrome.action.setBadgeText({ text: '' });
 
     // Notify all extension pages
     chrome.runtime.sendMessage({

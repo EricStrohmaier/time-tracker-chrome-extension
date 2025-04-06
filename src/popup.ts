@@ -93,9 +93,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadingContainer.style.display = "flex";
   loginContainer.style.display = "none";
   mainContainer.style.display = "none";
-
-  // Check if user is logged in
-  await checkAuthStatus();
+  
+  // First check local storage directly for faster initial rendering
+  const storageData = await chrome.storage.local.get(['userData', 'token']);
+  if (storageData.userData && storageData.token) {
+    // We have user data and token in storage, so we're logged in
+    user = storageData.userData;
+    updateUIForAuthenticatedUser();
+    loadProjects();
+    checkActiveTimeEntry();
+  } else {
+    // If not found in storage, check with background script
+    await checkAuthStatus();
+  }
 
   // Event listeners
   loginBtn.addEventListener("click", () => {
@@ -164,6 +174,9 @@ async function checkAuthStatus() {
           // User is authenticated
           user = response.user;
           updateUIForAuthenticatedUser();
+          // Load projects and check for active time entry
+          loadProjects();
+          checkActiveTimeEntry();
         } else {
           updateUIForUnauthenticatedUser();
         }

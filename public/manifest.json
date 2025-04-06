@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Time Tracker Extension",
   "version": "1.0.0",
-  "description": "Track your time directly from your browser",
+  "description": "Free time tracking extension for your browser",
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -11,23 +11,16 @@
       "128": "icon.png"
     }
   },
-  "permissions": [
-    "storage",
-    "tabs",
-    "alarms",
-    "windows"
-  ],
-  "host_permissions": [
-    "http://localhost:3000/*"
-  ],
+  "permissions": ["storage", "tabs", "alarms", "windows", "action"],
+  "host_permissions": ["http://tools.ericstrohmaier.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": [
-        "http://localhost:3000/signin*",
-        "http://localhost:3000/extension-auth-success*"
+        "http://tools.ericstrohmaier.com/signin*",
+        "http://tools.ericstrohmaier.com/extension-auth-success*"
       ],
       "js": ["content.js"]
     }

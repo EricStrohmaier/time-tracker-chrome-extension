@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "description": "Chrome extension for time tracking",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "node build.js",
+    "build:dev": "node build.js",
+    "build:prod": "node build.js --prod",
     "watch": "webpack --config webpack.config.js --watch"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@types/chrome": "^0.0.254",
+    "@types/node": "^22.14.0",
     "copy-webpack-plugin": "^11.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.3.3",

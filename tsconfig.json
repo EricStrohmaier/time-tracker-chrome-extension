@@ -11,7 +11,7 @@
     "outDir": "./dist",
     "lib": ["dom", "dom.iterable", "esnext"],
     "typeRoots": ["./node_modules/@types"],
-    "types": ["chrome"]
+    "types": ["chrome", "node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]

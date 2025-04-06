@@ -19,17 +19,41 @@
         </div>
       </div>
 
-      <div id="login-container">
+      <div id="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+
+      <div id="login-container" style="display: none">
         <p>Please log in to track your time</p>
         <button id="login-prompt-btn" class="btn btn-primary">Login</button>
       </div>
 
       <div id="main-container" style="display: none">
         <div class="project-selector">
-          <label for="project-select">Project:</label>
+          <div class="project-header">
+            <label for="project-select">Project:</label>
+            <button id="new-project-btn" class="btn btn-small">New Project</button>
+          </div>
           <select id="project-select">
             <option value="">Select a project</option>
           </select>
+        </div>
+        
+        <div id="create-project-container" style="display: none" class="create-project">
+          <h3>Create New Project</h3>
+          <div class="form-group">
+            <label for="project-name">Project Name:</label>
+            <input type="text" id="project-name" placeholder="Enter project name" />
+          </div>
+          <div class="form-group">
+            <label for="project-description">Description (optional):</label>
+            <textarea id="project-description" placeholder="Enter project description"></textarea>
+          </div>
+          <div class="form-actions">
+            <button id="cancel-project-btn" class="btn btn-outline">Cancel</button>
+            <button id="save-project-btn" class="btn btn-primary">Create Project</button>
+          </div>
         </div>
 
         <div class="description-input">

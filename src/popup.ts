@@ -32,6 +32,9 @@ import { API_URL } from "./config";
 const userEmailElement = document.getElementById("user-email") as HTMLElement;
 const loginBtn = document.getElementById("login-btn") as HTMLButtonElement;
 const logoutBtn = document.getElementById("logout-btn") as HTMLButtonElement;
+const loadingContainer = document.getElementById(
+  "loading-container"
+) as HTMLDivElement;
 const loginContainer = document.getElementById(
   "login-container"
 ) as HTMLDivElement;
@@ -44,6 +47,24 @@ const loginPromptBtn = document.getElementById(
 const projectSelect = document.getElementById(
   "project-select"
 ) as HTMLSelectElement;
+const newProjectBtn = document.getElementById(
+  "new-project-btn"
+) as HTMLButtonElement;
+const createProjectContainer = document.getElementById(
+  "create-project-container"
+) as HTMLDivElement;
+const projectNameInput = document.getElementById(
+  "project-name"
+) as HTMLInputElement;
+const projectDescriptionInput = document.getElementById(
+  "project-description"
+) as HTMLTextAreaElement;
+const saveProjectBtn = document.getElementById(
+  "save-project-btn"
+) as HTMLButtonElement;
+const cancelProjectBtn = document.getElementById(
+  "cancel-project-btn"
+) as HTMLButtonElement;
 const descriptionInput = document.getElementById(
   "description"
 ) as HTMLTextAreaElement;
@@ -68,26 +89,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Set dashboard URL
   openDashboardLink.href = `${API_URL}/dashboard`;
 
-  // Initially hide both containers until we know the auth status
+  // Show loading container, hide other containers
+  loadingContainer.style.display = "flex";
   loginContainer.style.display = "none";
   mainContainer.style.display = "none";
-  
-  // Show a loading indicator
-  const loadingIndicator = document.createElement("div");
-  loadingIndicator.id = "loading-indicator";
-  loadingIndicator.style.display = "flex";
-  loadingIndicator.style.justifyContent = "center";
-  loadingIndicator.style.alignItems = "center";
-  loadingIndicator.style.height = "100px";
-  loadingIndicator.style.margin = "20px 0";
-  loadingIndicator.textContent = "Loading...";
-  document.querySelector(".container")?.insertBefore(loadingIndicator, loginContainer);
 
   // Check if user is logged in
   await checkAuthStatus();
-  
-  // Remove loading indicator
-  loadingIndicator.remove();
 
   // Event listeners
   loginBtn.addEventListener("click", () => {
@@ -104,6 +112,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   startBtn.addEventListener("click", handleStartTimer);
   stopBtn.addEventListener("click", handleStopTimer);
   projectSelect.addEventListener("change", handleProjectChange);
+  
+  // Project creation event listeners
+  newProjectBtn.addEventListener("click", showCreateProjectForm);
+  cancelProjectBtn.addEventListener("click", hideCreateProjectForm);
+  saveProjectBtn.addEventListener("click", handleCreateProject);
+  projectNameInput.addEventListener("input", validateProjectForm);
 
   // Listen for auth updates from background script
   chrome.runtime.onMessage.addListener((message) => {
@@ -166,32 +180,26 @@ async function checkAuthStatus() {
 function updateUIForAuthenticatedUser() {
   if (!user) return;
 
+  // Hide loading container
+  loadingContainer.style.display = "none";
+  
   userEmailElement.textContent = user.email;
   loginBtn.style.display = "none";
   logoutBtn.style.display = "block";
   loginContainer.style.display = "none";
   mainContainer.style.display = "block";
-  
-  // Remove any loading indicator if it exists
-  const loadingIndicator = document.getElementById("loading-indicator");
-  if (loadingIndicator) {
-    loadingIndicator.remove();
-  }
 }
 
 // Update UI for unauthenticated user
 function updateUIForUnauthenticatedUser() {
+  // Hide loading container
+  loadingContainer.style.display = "none";
+  
   userEmailElement.textContent = "Not logged in";
   loginBtn.style.display = "block";
   logoutBtn.style.display = "none";
   loginContainer.style.display = "flex";
   mainContainer.style.display = "none";
-  
-  // Remove any loading indicator if it exists
-  const loadingIndicator = document.getElementById("loading-indicator");
-  if (loadingIndicator) {
-    loadingIndicator.remove();
-  }
 }
 
 // Handle login
@@ -249,14 +257,27 @@ async function loadProjects() {
       projectSelect.innerHTML = '<option value="">Select a project</option>';
 
       // Add project options
+      let hasActiveProjects = false;
       projects.forEach((project) => {
         if (project.is_active) {
+          hasActiveProjects = true;
           const option = document.createElement("option");
           option.value = project.id;
           option.textContent = project.name;
           projectSelect.appendChild(option);
         }
       });
+      
+      // Show a hint to create a project if there are no active projects
+      if (!hasActiveProjects) {
+        const emptyOption = document.createElement("option");
+        emptyOption.value = "";
+        emptyOption.textContent = "No projects found - Create a new one";
+        emptyOption.disabled = true;
+        projectSelect.innerHTML = "";
+        projectSelect.appendChild(emptyOption);
+        projectSelect.value = "";
+      }
     } else {
       console.error("Failed to load projects:", response.status);
       const errorText = await response.text();
@@ -489,4 +510,128 @@ function formatDate(dateString: string): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+// Show the create project form
+function showCreateProjectForm() {
+  // Hide the timer and description input
+  document.querySelector('.description-input')?.classList.add('hidden');
+  document.querySelector('.timer-display')?.classList.add('hidden');
+  
+  // Show the create project form
+  createProjectContainer.style.display = "block";
+  
+  // Clear form fields
+  projectNameInput.value = "";
+  projectDescriptionInput.value = "";
+  
+  // Focus on the project name input
+  projectNameInput.focus();
+  
+  // Disable the save button initially
+  saveProjectBtn.disabled = true;
+}
+
+// Hide the create project form
+function hideCreateProjectForm() {
+  // Show the timer and description input
+  document.querySelector('.description-input')?.classList.remove('hidden');
+  document.querySelector('.timer-display')?.classList.remove('hidden');
+  
+  // Hide the create project form
+  createProjectContainer.style.display = "none";
+}
+
+// Validate the project form
+function validateProjectForm() {
+  // Enable the save button only if the project name is not empty
+  saveProjectBtn.disabled = !projectNameInput.value.trim();
+}
+
+// Handle create project
+async function handleCreateProject() {
+  try {
+    // Check if user is authenticated
+    if (!user) return;
+    
+    // Validate form
+    const projectName = projectNameInput.value.trim();
+    if (!projectName) {
+      alert("Project name is required");
+      return;
+    }
+    
+    // Get token from storage
+    const { token } = (await chrome.storage.local.get("token")) as {
+      token?: string;
+    };
+    if (!token) {
+      console.error("No auth token found");
+      return;
+    }
+    
+    // Show loading state
+    saveProjectBtn.disabled = true;
+    saveProjectBtn.textContent = "Creating...";
+    
+    // Create the project
+    const response = await fetch(`${API_URL}/api/projects`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: projectName,
+        description: projectDescriptionInput.value.trim(),
+        is_active: true
+      }),
+    });
+    
+    if (response.ok) {
+      const newProject = await response.json();
+      console.log("Created project:", newProject);
+      
+      // Add the new project to the projects array
+      projects.push(newProject);
+      
+      // Add the new project to the select dropdown
+      const option = document.createElement("option");
+      option.value = newProject.id;
+      option.textContent = newProject.name;
+      projectSelect.appendChild(option);
+      
+      // Select the new project
+      projectSelect.value = newProject.id;
+      
+      // Enable the start button
+      startBtn.disabled = false;
+      
+      // Hide the create project form
+      hideCreateProjectForm();
+      
+      // Show success message
+      const successMessage = document.createElement("div");
+      successMessage.className = "success-message";
+      successMessage.textContent = `Project "${newProject.name}" created successfully!`;
+      mainContainer.insertBefore(successMessage, createProjectContainer);
+      
+      // Remove the success message after 3 seconds
+      setTimeout(() => {
+        successMessage.remove();
+      }, 3000);
+    } else {
+      console.error("Failed to create project:", response.status);
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      alert("Failed to create project. Please try again.");
+    }
+  } catch (error) {
+    console.error("Error creating project:", error);
+    alert("An error occurred while creating the project.");
+  } finally {
+    // Reset button state
+    saveProjectBtn.disabled = false;
+    saveProjectBtn.textContent = "Create Project";
+  }
 }

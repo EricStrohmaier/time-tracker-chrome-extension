@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Time Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Time Tracker</h1>
+        <div id="user-info">
+          <span id="user-email">Not logged in</span>
+          <button id="login-btn" class="btn btn-primary">Login</button>
+          <button id="logout-btn" class="btn btn-outline" style="display: none">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div id="login-container">
+        <p>Please log in to track your time</p>
+        <button id="login-prompt-btn" class="btn btn-primary">Login</button>
+      </div>
+
+      <div id="main-container" style="display: none">
+        <div class="project-selector">
+          <label for="project-select">Project:</label>
+          <select id="project-select">
+            <option value="">Select a project</option>
+          </select>
+        </div>
+
+        <div class="description-input">
+          <label for="description">What are you working on?</label>
+          <textarea
+            id="description"
+            placeholder="Describe what you're working on..."
+          ></textarea>
+        </div>
+
+        <div class="timer-display">
+          <div id="timer">00:00:00</div>
+          <div class="timer-controls">
+            <button id="start-btn" class="btn btn-success">Start</button>
+            <button id="stop-btn" class="btn btn-danger" disabled>Stop</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <a href="#" id="open-dashboard" target="_blank">Open Dashboard</a>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

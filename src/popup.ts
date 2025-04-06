@@ -68,8 +68,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Set dashboard URL
   openDashboardLink.href = `${API_URL}/dashboard`;
 
+  // Initially hide both containers until we know the auth status
+  loginContainer.style.display = "none";
+  mainContainer.style.display = "none";
+  
+  // Show a loading indicator
+  const loadingIndicator = document.createElement("div");
+  loadingIndicator.id = "loading-indicator";
+  loadingIndicator.style.display = "flex";
+  loadingIndicator.style.justifyContent = "center";
+  loadingIndicator.style.alignItems = "center";
+  loadingIndicator.style.height = "100px";
+  loadingIndicator.style.margin = "20px 0";
+  loadingIndicator.textContent = "Loading...";
+  document.querySelector(".container")?.insertBefore(loadingIndicator, loginContainer);
+
   // Check if user is logged in
   await checkAuthStatus();
+  
+  // Remove loading indicator
+  loadingIndicator.remove();
 
   // Event listeners
   loginBtn.addEventListener("click", () => {
@@ -153,6 +171,12 @@ function updateUIForAuthenticatedUser() {
   logoutBtn.style.display = "block";
   loginContainer.style.display = "none";
   mainContainer.style.display = "block";
+  
+  // Remove any loading indicator if it exists
+  const loadingIndicator = document.getElementById("loading-indicator");
+  if (loadingIndicator) {
+    loadingIndicator.remove();
+  }
 }
 
 // Update UI for unauthenticated user
@@ -162,6 +186,12 @@ function updateUIForUnauthenticatedUser() {
   logoutBtn.style.display = "none";
   loginContainer.style.display = "flex";
   mainContainer.style.display = "none";
+  
+  // Remove any loading indicator if it exists
+  const loadingIndicator = document.getElementById("loading-indicator");
+  if (loadingIndicator) {
+    loadingIndicator.remove();
+  }
 }
 
 // Handle login

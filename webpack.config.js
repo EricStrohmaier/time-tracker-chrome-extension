@@ -3,10 +3,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const webpack = require("webpack");
 
 // Determine environment
-const isDevelopment = process.env.NODE_ENV !== "production";
-const API_URL = isDevelopment
-  ? "http://localhost:3000"
-  : "http://tools.ericstrohmaier.com";
+const API_URL = "http://tools.ericstrohmaier.com";
 
 module.exports = {
   mode: "development",

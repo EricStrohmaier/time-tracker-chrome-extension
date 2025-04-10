@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Time Tracker Extension",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Free time tracking extension for your browser",
   "action": {
     "default_popup": "popup.html",

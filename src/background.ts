@@ -17,13 +17,13 @@ let authState = {
   user: null as User | null
 };
 
+
 // Check if user is already authenticated on startup
 chrome.storage.local.get(['userData', 'token'], (result) => {
   if (result.userData && result.token) {
     authState.isAuthenticated = true;
     authState.user = result.userData;
-    console.log('User is already authenticated:', authState.user);
-    
+
     // Set badge to indicate logged-in state
     chrome.action.setBadgeText({ text: '✓' });
     chrome.action.setBadgeBackgroundColor({ color: '#00873c' });
@@ -38,21 +38,26 @@ chrome.storage.local.get(['userData', 'token'], (result) => {
 
 // Listen for messages from content scripts or popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Background received message:', message);
 
   if (message.type === 'AUTH_SUCCESS') {
+
     // Store user data
     authState.isAuthenticated = true;
     authState.user = message.user;
 
-    console.log('Saving auth data to storage:', { user: message.user, token: message.token });
-    
+
     // Save to storage
     chrome.storage.local.set({
       userData: message.user,
       token: message.token
+    }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[AUTH DEBUG] Error saving to storage:', chrome.runtime.lastError);
+      } else {
+        console.log('[AUTH DEBUG] Successfully saved auth data to storage');
+      }
     });
-    
+
     // Set badge to indicate logged-in state
     chrome.action.setBadgeText({ text: '✓' });
     chrome.action.setBadgeBackgroundColor({ color: '#00873c' });
@@ -62,6 +67,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       type: 'AUTH_UPDATED',
       isAuthenticated: true,
       user: message.user
+    }, (broadcastResponse) => {
+      if (chrome.runtime.lastError) {
+        console.log('[AUTH DEBUG] Error broadcasting update:', chrome.runtime.lastError);
+      } else {
+        console.log('[AUTH DEBUG] Broadcast response:', broadcastResponse);
+      }
     });
 
     // Close any auth tabs that might be open
@@ -97,7 +108,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     // Clear storage
     chrome.storage.local.remove(['userData', 'token', 'activeTimeEntry']);
-    
+
     // Clear badge
     chrome.action.setBadgeText({ text: '' });
 
@@ -112,19 +123,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === 'openLoginPage') {
-    console.log('Opening login page...');
     try {
+      const loginUrl = `${API_URL}/signin?extension=true`;
+
       chrome.windows.create({
-        url: `${API_URL}/signin?extension=true`,
+        url: loginUrl,
         type: 'popup',
         width: 800,
         height: 600
       }, (window) => {
-        console.log('Login window created:', window);
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+          return;
+        }
+
         sendResponse({ success: true, windowId: window?.id });
       });
     } catch (error: any) {
-      console.error('Error opening login window:', error);
       sendResponse({ success: false, error: error?.message || 'Unknown error' });
     }
     return true; // Keep the message channel open for async response

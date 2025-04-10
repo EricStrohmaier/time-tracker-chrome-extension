@@ -12,15 +12,17 @@
     }
   },
   "permissions": ["storage", "tabs", "alarms", "windows"],
-  "host_permissions": ["http://tools.ericstrohmaier.com/*"],
+  "host_permissions": ["https://tools.ericstrohmaier.com/*", "http://localhost:3000/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": [
-        "http://tools.ericstrohmaier.com/signin*",
-        "http://tools.ericstrohmaier.com/extension-auth-success*"
+        "https://tools.ericstrohmaier.com/signin*",
+        "https://tools.ericstrohmaier.com/extension-auth-success*",
+        "http://localhost:3000/signin*",
+        "http://localhost:3000/extension-auth-success*"
       ],
       "js": ["content.js"]
     }

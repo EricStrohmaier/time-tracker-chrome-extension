@@ -2,8 +2,8 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const webpack = require("webpack");
 
-// Determine environment
-const API_URL = "http://tools.ericstrohmaier.com";
+// Set your API URL here
+const API_URL = "https://tools.ericstrohmaier.com";
 
 module.exports = {
   mode: "development",
@@ -36,9 +36,6 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       "process.env.API_URL": JSON.stringify(API_URL),
-      "process.env.NODE_ENV": JSON.stringify(
-        process.env.NODE_ENV || "development"
-      ),
     }),
   ],
 };

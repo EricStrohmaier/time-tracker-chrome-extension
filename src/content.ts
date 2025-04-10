@@ -31,8 +31,6 @@ const isExtensionAuth = urlParams.extension === "true";
 // Function to fetch session data and send to extension
 async function fetchSessionAndNotifyExtension() {
   try {
-    console.log("Fetching session data for extension");
-
     // Fetch the current session
     const response = await fetch(`${API_URL}/api/auth/session`, {
       method: "GET",
@@ -44,7 +42,6 @@ async function fetchSessionAndNotifyExtension() {
 
     if (response.ok) {
       const sessionData = await response.json();
-      console.log("Session data received:", sessionData);
 
       // Extract user and token from the response
       const user = sessionData.user || sessionData.session?.user;
@@ -54,10 +51,7 @@ async function fetchSessionAndNotifyExtension() {
         sessionData.session?.access_token;
 
       if (user && token) {
-        console.log("Auth success detected, sending to extension", {
-          user,
-          token: token.substring(0, 10) + "...",
-        });
+
 
         // Try multiple ways to communicate with the extension
         try {
@@ -69,10 +63,9 @@ async function fetchSessionAndNotifyExtension() {
               token: token,
             },
             (response) => {
-              console.log("Extension response:", response);
               if (chrome.runtime.lastError) {
                 console.error(
-                  "Chrome runtime error:",
+                  "[AUTH DEBUG] Chrome runtime error:",
                   chrome.runtime.lastError
                 );
               }
@@ -112,7 +105,6 @@ async function fetchSessionAndNotifyExtension() {
 
 // Handle extension auth success page
 if (isExtensionAuthSuccess) {
-  console.log("Extension auth success page detected");
   // Add a visible message to the page for debugging
   const debugElement = document.createElement("div");
   debugElement.style.position = "fixed";
@@ -144,8 +136,6 @@ if (isExtensionAuthSuccess) {
 
 // Handle signin page with extension=true
 if (isExtensionAuth) {
-  console.log("Extension authentication flow detected");
-
   // Listen for auth success event from the page
   window.addEventListener("message", (event) => {
     // Only accept messages from the same origin

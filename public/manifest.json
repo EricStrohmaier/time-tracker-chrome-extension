@@ -11,7 +11,7 @@
       "128": "icon.png"
     }
   },
-  "permissions": ["storage", "tabs", "alarms", "windows", "action"],
+  "permissions": ["storage", "tabs", "alarms", "windows"],
   "host_permissions": ["http://tools.ericstrohmaier.com/*"],
   "background": {
     "service_worker": "background.js"

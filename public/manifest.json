@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Time Tracker Extension",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Free time tracking extension for your browser",
   "action": {
     "default_popup": "popup.html",
@@ -31,5 +31,8 @@
     "16": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://tools.ericstrohmaier.com/"
   }
 }

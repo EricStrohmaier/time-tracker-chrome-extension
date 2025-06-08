@@ -93,9 +93,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadingContainer.style.display = "flex";
   loginContainer.style.display = "none";
   mainContainer.style.display = "none";
-  
+
   // First check local storage directly for faster initial rendering
-  const storageData = await chrome.storage.local.get(['userData', 'token']);
+  const storageData = await chrome.storage.local.get(["userData", "token"]);
   if (storageData.userData && storageData.token) {
     // We have user data and token in storage, so we're logged in
     user = storageData.userData;
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   startBtn.addEventListener("click", handleStartTimer);
   stopBtn.addEventListener("click", handleStopTimer);
   projectSelect.addEventListener("change", handleProjectChange);
-  
+
   // Project creation event listeners
   newProjectBtn.addEventListener("click", showCreateProjectForm);
   cancelProjectBtn.addEventListener("click", hideCreateProjectForm);
@@ -195,7 +195,7 @@ function updateUIForAuthenticatedUser() {
 
   // Hide loading container
   loadingContainer.style.display = "none";
-  
+
   userEmailElement.textContent = user.email;
   loginBtn.style.display = "none";
   logoutBtn.style.display = "block";
@@ -207,7 +207,7 @@ function updateUIForAuthenticatedUser() {
 function updateUIForUnauthenticatedUser() {
   // Hide loading container
   loadingContainer.style.display = "none";
-  
+
   userEmailElement.textContent = "Not logged in";
   loginBtn.style.display = "block";
   logoutBtn.style.display = "none";
@@ -280,7 +280,7 @@ async function loadProjects() {
           projectSelect.appendChild(option);
         }
       });
-      
+
       // Show a hint to create a project if there are no active projects
       if (!hasActiveProjects) {
         const emptyOption = document.createElement("option");
@@ -528,19 +528,19 @@ function formatDate(dateString: string): string {
 // Show the create project form
 function showCreateProjectForm() {
   // Hide the timer and description input
-  document.querySelector('.description-input')?.classList.add('hidden');
-  document.querySelector('.timer-display')?.classList.add('hidden');
-  
+  document.querySelector(".description-input")?.classList.add("hidden");
+  document.querySelector(".timer-display")?.classList.add("hidden");
+
   // Show the create project form
   createProjectContainer.style.display = "block";
-  
+
   // Clear form fields
   projectNameInput.value = "";
   projectDescriptionInput.value = "";
-  
+
   // Focus on the project name input
   projectNameInput.focus();
-  
+
   // Disable the save button initially
   saveProjectBtn.disabled = true;
 }
@@ -548,9 +548,9 @@ function showCreateProjectForm() {
 // Hide the create project form
 function hideCreateProjectForm() {
   // Show the timer and description input
-  document.querySelector('.description-input')?.classList.remove('hidden');
-  document.querySelector('.timer-display')?.classList.remove('hidden');
-  
+  document.querySelector(".description-input")?.classList.remove("hidden");
+  document.querySelector(".timer-display")?.classList.remove("hidden");
+
   // Hide the create project form
   createProjectContainer.style.display = "none";
 }
@@ -566,14 +566,14 @@ async function handleCreateProject() {
   try {
     // Check if user is authenticated
     if (!user) return;
-    
+
     // Validate form
     const projectName = projectNameInput.value.trim();
     if (!projectName) {
       alert("Project name is required");
       return;
     }
-    
+
     // Get token from storage
     const { token } = (await chrome.storage.local.get("token")) as {
       token?: string;
@@ -582,11 +582,11 @@ async function handleCreateProject() {
       console.error("No auth token found");
       return;
     }
-    
+
     // Show loading state
     saveProjectBtn.disabled = true;
     saveProjectBtn.textContent = "Creating...";
-    
+
     // Create the project
     const response = await fetch(`${API_URL}/api/projects`, {
       method: "POST",
@@ -597,38 +597,38 @@ async function handleCreateProject() {
       body: JSON.stringify({
         name: projectName,
         description: projectDescriptionInput.value.trim(),
-        is_active: true
+        is_active: true,
       }),
     });
-    
+
     if (response.ok) {
       const newProject = await response.json();
       console.log("Created project:", newProject);
-      
+
       // Add the new project to the projects array
       projects.push(newProject);
-      
+
       // Add the new project to the select dropdown
       const option = document.createElement("option");
       option.value = newProject.id;
       option.textContent = newProject.name;
       projectSelect.appendChild(option);
-      
+
       // Select the new project
       projectSelect.value = newProject.id;
-      
+
       // Enable the start button
       startBtn.disabled = false;
-      
+
       // Hide the create project form
       hideCreateProjectForm();
-      
+
       // Show success message
       const successMessage = document.createElement("div");
       successMessage.className = "success-message";
       successMessage.textContent = `Project "${newProject.name}" created successfully!`;
       mainContainer.insertBefore(successMessage, createProjectContainer);
-      
+
       // Remove the success message after 3 seconds
       setTimeout(() => {
         successMessage.remove();
